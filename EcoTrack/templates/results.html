@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Results{% endblock %}
+
+{% block content %}
+{% set colors = {'transport': 'var(--sky)', 'electricity': 'var(--sun)', 'food': 'var(--accent)'} %}
+{% set stroke = {'transport': '#5cc8ff', 'electricity': '#ffb454', 'food': '#7ee8a8'} %}
+{% set names = {'transport': 'Transport', 'electricity': 'Electricity', 'food': 'Food'} %}
+
+<main class="results-wrap">
+    <div class="eyebrow">Step 2 of 2 · Your estimate</div>
+    <h1>About <span>{{ "%.2f"|format(c.year) }}</span> tonnes of CO₂e a year.</h1>
+    <p class="lede">{{ "%.1f"|format(c.day) }} kg every day from the way you travel, use electricity and eat.</p>
+
+    <div class="r-grid">
+        <section class="panel">
+            <h2>Where it comes from</h2>
+            <div class="donut-box">
+                <div class="donut">
+                    <svg viewBox="0 0 200 200" aria-hidden="true">
+                        <circle cx="100" cy="100" r="78" stroke="#1a1a1d"/>
+                        {% for a in donut %}
+                        <circle cx="100" cy="100" r="78" stroke="{{ stroke[a.key] }}"
+                                stroke-dasharray="{{ '%.2f'|format(a.dash) }} {{ '%.2f'|format(a.circumference) }}"
+                                stroke-dashoffset="{{ '%.2f'|format(a.offset) }}"/>
+                        {% endfor %}
+                    </svg>
+                    <div class="center"><b>{{ "%.2f"|format(c.year) }}</b><span>t CO₂e / yr</span></div>
+                </div>
+                <div class="legend">
+                    {% for a in donut %}
+                    <div>
+                        <i style="background:{{ colors[a.key] }}"></i>
+                        <span>{{ names[a.key] }}</span>
+                        <span>{{ "%.1f"|format(c[a.key]) }} kg · {{ (a.share * 100)|round|int }}%</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="trees">
+                <span aria-hidden="true"><svg width="26" height="26" viewBox="0 0 32 32" fill="none" stroke="#7ee8a8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 29V16M16 16c-5 0-8-3-8-8 5 0 8 3 8 8zM16 20c4 0 7-3 7-7-4 0-7 3-7 7z"/></svg></span>
+                <span>A mature tree absorbs roughly 21 kg a year. Offsetting this would take about <b>{{ "{:,}".format(trees) }}</b> trees.</span>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>How you compare</h2>
+            <div class="bm">
+                {% for b in bench %}
+                <div class="bm-row{% if b.you %} you{% endif %}">
+                    <div class="bm-top"><span>{{ b.name }}</span><span>{{ "%.1f"|format(b.t) }} t</span></div>
+                    <div class="bm-bar"><b style="width:{{ '%.1f'|format(b.width) }}%"></b></div>
+                </div>
+                {% endfor %}
+            </div>
+            <p class="note">Your estimate covers travel, home electricity and food only, so it sits below a full footprint. Benchmarks are approximate whole-life averages per person, and emission factors are typical values, not measurements.</p>
+        </section>
+    </div>
+
+    <section class="tips panel" style="margin-top:20px">
+        <h2>Where you can cut the most</h2>
+        {% for t in tips %}
+        <div class="tip">
+            <h3>{{ t.title }}</h3>
+            <p>{{ t.text }}</p>
+            {% if t.saving > 0 %}
+            <div class="save">−{{ "{:,}".format(t.saving|round|int) }} kg<small>per year</small></div>
+            {% else %}
+            <div class="save"><small>habit</small></div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </section>
+
+    <div class="form-actions">
+        <a href="{{ url_for('lifestyle') }}" class="btn ghost"><span aria-hidden="true">←</span> Adjust my habits</a>
+        <a href="{{ url_for('home') }}" class="btn">Back home</a>
+    </div>
+</main>
+{% endblock %}

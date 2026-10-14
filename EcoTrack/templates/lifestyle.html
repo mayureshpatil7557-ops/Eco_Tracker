@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Lifestyle{% endblock %}
+
+{% block content %}
+<main class="form-wrap">
+    <div class="eyebrow">Step 1 of 2 · Your daily habits</div>
+    <h1>Choose your <span>lifestyle.</span></h1>
+    <p class="lede">Tell us about your everyday habits to estimate your carbon footprint.</p>
+
+    {% if error %}
+    <div class="error-box" role="alert">{{ error }}</div>
+    {% endif %}
+
+    <form action="{{ url_for('results') }}" method="POST" class="form-grid lifestyle-form">
+        <div class="fields">
+            <section class="panel">
+                <h2><i style="background:var(--sky)"></i>Transportation</h2>
+
+                <div class="field">
+                    <span class="label" id="transportLabel">Primary transport</span>
+                    <div class="choices" role="radiogroup" aria-labelledby="transportLabel">
+                        {% set transports = [
+                            ('walking', 'Walking / Cycling'),
+                            ('train', 'Electric train / Metro'),
+                            ('bus', 'Bus'),
+                            ('motorcycle', 'Motorcycle / Scooter'),
+                            ('car', 'Petrol / Diesel car')] %}
+                        {% for value, label in transports %}
+                        <input type="radio" name="transport" id="t-{{ value }}" value="{{ value }}" {% if form.transport == value %}checked{% endif %}>
+                        <label for="t-{{ value }}">{{ label }}</label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="distance">Daily travel distance (km)</label>
+                    <div class="row">
+                        <input id="distanceRange" type="range" min="0" max="150" step="0.5" value="{{ form.distance }}" aria-label="Daily travel distance slider">
+                        <input id="distance" name="distance" type="number" min="0" max="150" step="0.1" value="{{ form.distance }}" required>
+                    </div>
+                </div>
+
+                <div class="field" id="passengerGroup" {% if form.transport != 'car' %}hidden{% endif %}>
+                    <label for="passengers">People sharing the car</label>
+                    <input id="passengers" name="passengers" type="number" min="1" max="8" step="1" value="{{ form.passengers }}">
+                    <span class="hint">Emissions are split between everyone in the car.</span>
+                </div>
+            </section>
+
+            <section class="panel">
+                <h2><i style="background:var(--sun)"></i>Electricity</h2>
+
+                <div class="field">
+                    <label for="electricity">Daily household use (kWh)</label>
+                    <div class="row">
+                        <input id="electricityRange" type="range" min="0" max="50" step="0.1" value="{{ form.electricity }}" aria-label="Daily electricity use slider">
+                        <input id="electricity" name="electricity" type="number" min="0" max="50" step="0.1" value="{{ form.electricity }}" required>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="household_size">People sharing household electricity</label>
+                    <input id="household_size" name="household_size" type="number" min="1" max="10" step="1" value="{{ form.household_size }}" required>
+                </div>
+            </section>
+
+            <section class="panel">
+                <h2><i style="background:var(--accent)"></i>Food habits</h2>
+
+                <div class="field">
+                    <span class="label" id="dietLabel">Typical diet</span>
+                    <div class="choices" role="radiogroup" aria-labelledby="dietLabel">
+                        {% set diets = [
+                            ('plant', 'Plant-forward'),
+                            ('vegetarian', 'Vegetarian'),
+                            ('mixed', 'Mixed diet'),
+                            ('meat', 'Meat-heavy')] %}
+                        {% for value, label in diets %}
+                        <input type="radio" name="diet" id="d-{{ value }}" value="{{ value }}" {% if form.diet == value %}checked{% endif %}>
+                        <label for="d-{{ value }}">{{ label }}</label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <aside class="live" aria-live="polite">
+            <div class="tag">Live estimate</div>
+            <div class="big"><span id="liveDay">0.0</span><small>kg CO₂e / day</small></div>
+            <p class="sub"><span id="liveYear">0.0</span> tonnes a year</p>
+            <div class="stack" aria-hidden="true">
+                <b id="sT" style="background:var(--sky)"></b><b id="sE" style="background:var(--sun)"></b><b id="sF" style="background:var(--accent)"></b>
+            </div>
+            <div class="legend">
+                <div><i style="background:var(--sky)"></i><span>Transport</span><span id="lT">0.0 kg</span></div>
+                <div><i style="background:var(--sun)"></i><span>Electricity</span><span id="lE">0.0 kg</span></div>
+                <div><i style="background:var(--accent)"></i><span>Food</span><span id="lF">0.0 kg</span></div>
+            </div>
+            <div class="form-actions" style="margin-top:26px">
+                <button type="submit" class="btn" style="width:100%">Calculate footprint <span aria-hidden="true">→</span></button>
+                <a href="{{ url_for('home') }}" class="btn ghost" style="width:100%"><span aria-hidden="true">←</span> Back home</a>
+            </div>
+        </aside>
+    </form>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+{% endblock %}
